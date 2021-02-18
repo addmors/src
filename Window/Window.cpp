@@ -87,6 +87,7 @@ void Window::Render(vector<Shape*> &shapes)
 		shapes[i]->Draw();
 	}
 	if (mouse.is_presed) {
+
 		PickingTexture::PixelInfo Pixel = m_pickingTexture.ReadPixel((unsigned int)mouse.x, 600 - (unsigned int)mouse.y);
 		std::cout << Pixel.PrimID << " " << mouse.x << " " << mouse.y << endl;
 		if (Pixel.PrimID != 0) {
