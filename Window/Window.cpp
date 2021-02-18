@@ -62,6 +62,7 @@ void Window::Picing(vector<Shape*> &shapes) {
 	for (unsigned int i = 0; i < shapes.size(); i++) {
 		glm::mat4 model(glm::translate(glm::mat4(1), { shapes[i]->position,0 }));
 		model = projectionMatrix * glm::rotate(model, shapes[i]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, shapes[i]->mScale);
 		m_pickingEffect.SetObjectIndex(i);
 		picing->SetMat4("model", model);
 		m_pickingEffect.DrawStartCB(i);
@@ -83,6 +84,7 @@ void Window::Render(vector<Shape*> &shapes)
 	{
 		glm::mat4 model(glm::translate(glm::mat4(1), { shapes[i]->position,0 }));
 		model = projectionMatrix * glm::rotate(model, shapes[i]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, shapes[i]->mScale);
 		shader->SetMat4("model", model);
 		shapes[i]->Draw();
 	}
@@ -94,6 +96,7 @@ void Window::Render(vector<Shape*> &shapes)
 			red->Use();
 			red->SetMat4("projection", projectionMatrix);
 			glm::mat4 model(glm::translate(glm::mat4(1), { shapes[Pixel.DrawID]->position, 0 }));
+			model = glm::scale(model, shapes[Pixel.DrawID]->mScale);
 			model = projectionMatrix * glm::rotate(model, shapes[Pixel.DrawID]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
 			red->SetMat4("model", model);
 			shapes[Pixel.DrawID]->Draw();

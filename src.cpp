@@ -9,16 +9,14 @@ int main()
 
 	Scene scene(delt,15);
 
+	Circle::Init();
 	Polygon* polygon = new Polygon(1, 1);	
 	Polygon* polygon2 = new Polygon(40, 2);
 	Polygon* polygon3 = new Polygon(4, 40);
 	Polygon* polygon4 = new Polygon(10, 10);
-	Circle* circle = new Circle(20, 2, 2);
+	Circle* circle = new Circle(20, 20, 150);
 	Joint j(polygon2, polygon3, { 30,0 }, { 0,3 });
-
-	circle->position = { 50, 200 };
 	circle->ComputeMass(2);
-
 	polygon->position = { 100,-50};
 	polygon2->position = {0,30};
 	polygon3->position = {14,27};
@@ -50,7 +48,7 @@ int main()
 	delete polygon2;
 	delete polygon3;
 	delete polygon4;
-		delete circle;
+	delete circle;
 	
 
 	return 0;
