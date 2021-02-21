@@ -25,7 +25,6 @@ void _setupMesh(GLuint &texture, GLuint &VAO, GLuint &VBO, GLuint &EBO,
 	glBindTexture(GL_TEXTURE_2D, 0);
 	SOIL_free_image_data(image);
 
-
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -166,6 +165,7 @@ void Circle::Init(){
 	indices_c.push_back(39);
 	indices_c.push_back(1);
 	setupMeshCircle();
+	vertices_c.clear();
 }
 
 Polygon::Polygon(glm::vec2 vecs[], int count_vert, glm::vec2 Pos, glm::vec3 color)

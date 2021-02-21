@@ -80,7 +80,7 @@ public:
 	Circle(float r, float x, float y);
 	static void Init();
 	void ComputeMass(float density) override;
-	void Delete() override;
+	static void Delete();
 	void Draw() const override;
 	Type GetType() const override { return Type::typeCircle; };
 	static void setupMeshCircle();

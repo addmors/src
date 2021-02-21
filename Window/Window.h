@@ -15,19 +15,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouseKey(GLFWwindow * window, int button, int action, int mode);
 
 
-class Window
+class Window 
 {
 public:
 	Window();
-	void Terminate() { glfwTerminate(); delete shader; delete picing; delete red; };
+	~Window() { glfwTerminate(); delete shader; delete picing; delete red; };
 	void Render(vector<Shape*> &shapes);
 	void Picing(vector<Shape*> &shapes);
 	int MainLoop(Scene&);
 private:
-	GLFWwindow* window;
-	Shader *shader, *picing, *red;
-	int width, height;
+
 	glm::mat4 projectionMatrix;
+	Shader *shader, *picing, *red;
+	GLFWwindow* window;
+	int width, height;
 	PickingTexture m_pickingTexture;
 	PickingTechnique m_pickingEffect;
 };

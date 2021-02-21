@@ -119,8 +119,7 @@ void CircletoCircle(Manifold *m, Shape *a, Shape *b)
 	Circle *A = reinterpret_cast<Circle *>(a);
 	Circle *B = reinterpret_cast<Circle *>(b);
 	glm::vec2 normal = a->position - b->position;
-
-	double dist_sqr = std::sqrt(normal.length());
+	double dist_sqr = normal.x*normal.x + normal.y*normal.y;
 	float radius = A->radius + B->radius;
 
 	if (dist_sqr >= radius * radius)
@@ -140,9 +139,10 @@ void CircletoCircle(Manifold *m, Shape *a, Shape *b)
 	} else 
 	{
 		m->penetration = radius - distance;
-		m->normal = normal / distance; // Faster than using Normalized since we already performed sqrt
+		m->normal = -normal / distance; // Faster than using Normalized since we already performed sqrt
 		m->contacts[0] = m->normal * A->radius + a->position;
 	}
+
 };
 
 void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
