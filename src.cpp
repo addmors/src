@@ -1,12 +1,13 @@
 ﻿#include "SceenPhis\Sceen.h"
 #include "Window\Window.h"
-
+#include "Time.h"
 float delt = (float)1 / (float)60;
+
+
 
 int main()
 {
 	Window win;
-
 	Scene scene(delt,15);
 
 	Circle::Init();

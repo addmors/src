@@ -5,6 +5,9 @@
 #include <iostream>
 #include "../shader/Shad.h"
 #include "../SceenPhis/Sceen.h"
+#include "../Time.h"
+
+
 static struct {
 	bool is_presed;
 	double x;
@@ -24,9 +27,10 @@ public:
 	void Picing(vector<Shape*> &shapes);
 	int MainLoop(Scene&);
 private:
-
 	glm::mat4 projectionMatrix;
+	Clock clock;
 	Shader *shader, *picing, *red;
+	float accumulator = 0;
 	GLFWwindow* window;
 	int width, height;
 	PickingTexture m_pickingTexture;

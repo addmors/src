@@ -107,13 +107,28 @@ void Window::Render(vector<Shape*> &shapes)
 
 int Window::MainLoop(Scene& scene) {
 	shader->Use();
-	shader->SetInt("screenTexture", 0);
+	shader->SetInt("screenTexture", 0);	
+	bool frameStepping = false;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-		float current = (float)glfwGetTime();
+#ifdef WIN32
+		accumulator += clock.Elapsed();
+#else
+		accumulator += clock.Elapsed() / static_cast<float>(std::chrono::duration_cast<clock_freq>(std::chrono::seconds(1)).count());
+#endif
+		clock.Start();
+
+		accumulator = Clamp(0.0f, 0.1f, accumulator);
+		
+		while (accumulator >= dt)
+		{
+			scene.Step();
+			accumulator -= dt;
+		}
+		clock.Stop();
 		Picing(scene.shapes);
-		scene.Step();
 		Render(scene.shapes);
 		glfwSwapBuffers(window);
 	}
