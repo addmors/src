@@ -1,24 +1,24 @@
 #include "Window.h"
 
 
-glm::mat4 generateModel(glm::mat4 &projMat, glm::vec3 &scale, glm::vec2 &pos, float orient = 0) {
+glm::mat4 generateModel(glm::mat4 &projMat, glm::vec3 &scale, glm::vec2 &pos, float orient = 0){
 	glm::mat4 model(glm::translate(glm::mat4(1), {pos,0}));
 	model = glm::scale(model, scale);
 	model = glm::rotate(model, orient, glm::vec3(0.0f, 0.0f, 1.0f));
 	return model;
 };
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
 	mouse.x = xpos;
 	mouse.y = ypos;
 };
 
-void mouseKey(GLFWwindow * window, int button, int action, int mode)
-{
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == 1) {
+void mouseKey(GLFWwindow * window, int button, int action, int mode){
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == 1) 
 		mouse.is_presed = true;
-	}
-	else mouse.is_presed = false;
+	else
+		mouse.is_presed = false;
+	
 	glfwGetCursorPos(window, &mouse.x, &mouse.y);
 };
 

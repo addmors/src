@@ -97,4 +97,12 @@
     <None Include="shader\picking_technique.fs" />
     <None Include="shader\red.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="123.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="wood2.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

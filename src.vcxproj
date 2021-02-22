@@ -203,6 +203,10 @@
     <None Include="shader\shadowshader.fs" />
     <None Include="shader\shadowshader.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="123.jpg" />
+    <Image Include="wood2.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

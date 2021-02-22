@@ -14,7 +14,7 @@ void _setupMesh(GLuint &texture, GLuint &VAO, GLuint &VBO, GLuint &EBO,
 	vector<unsigned int> &indices, vector<Vert> &vertices)
 {
 	int w, h;
-	unsigned char* image = SOIL_load_image("wood.png", &w, &h, 0, SOIL_LOAD_RGB);
+	unsigned char* image = SOIL_load_image("container.jpg", &w, &h, 0, SOIL_LOAD_RGB);
 	glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
