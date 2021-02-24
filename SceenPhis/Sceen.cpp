@@ -30,7 +30,7 @@ void Scene::Step(void)
 			Shape *B = shapes[j];
 			if (A->joint == B) continue;
 			if (A->invesMass == 0 && B->invesMass == 0) continue;
-			//if ((A->length + B->length+3) < glm::length(A->position - B->position)) continue;
+			if ((A->length + B->length+3) < glm::length(A->position - B->position)) continue;
 			Manifold m(A, B);
 			m.Solve();
 			if (m.contact_count) contacts.push_back(m);
@@ -43,9 +43,7 @@ void Scene::Step(void)
 	 for(int i = 0; i < contacts.size( ); ++i)
 			contacts[i].Initialize( );
 
-
 	 for (int j = 0; j < m_iterations; ++j) {
-
 		 for (int i = 0; i < contacts.size(); ++i)
 			 contacts[i].ApplyImpulse();
 		 for (auto joint : joints)
@@ -54,7 +52,7 @@ void Scene::Step(void)
 			 contacts[i].ApplyImpulse();
 	 }
 
-	 for (int i = 0; i < shapes.size(); ++i)
+	for (int i = 0; i < shapes.size(); ++i)
 		 IntegrateVelocity(shapes[i], m_dt);
 
 	for (auto joint : joints)

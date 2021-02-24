@@ -1,11 +1,18 @@
 #include "Window.h"
 
 
+glm::mat4 generateModel(glm::mat4 &projMat, glm::vec3 &scale, glm::vec2 &pos, float orient = 0) {
+	glm::mat4 model(glm::translate(glm::mat4(1), {pos,0}));
+	model = glm::scale(model, scale);
+	model = glm::rotate(model, orient, glm::vec3(0.0f, 0.0f, 1.0f));
+	return model;
+};
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	mouse.x = xpos;
 	mouse.y = ypos;
 };
+
 void mouseKey(GLFWwindow * window, int button, int action, int mode)
 {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == 1) {
@@ -15,8 +22,8 @@ void mouseKey(GLFWwindow * window, int button, int action, int mode)
 	glfwGetCursorPos(window, &mouse.x, &mouse.y);
 };
 
-Window::Window() : projectionMatrix(glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 200.0f))
-{
+
+Window::Window() : projectionMatrix(glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 200.0f)){
 	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW\n");
 		exit(-1);
@@ -60,10 +67,9 @@ void Window::Picing(vector<Shape*> &shapes) {
 	picing->SetMat4("projection", projectionMatrix);
 
 	for (unsigned int i = 0; i < shapes.size(); i++) {
-		glm::mat4 model(glm::translate(glm::mat4(1), { shapes[i]->position,0 }));
-		model = projectionMatrix * glm::rotate(model, shapes[i]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
+
 		m_pickingEffect.SetObjectIndex(i);
-		picing->SetMat4("model", model);
+		picing->SetMat4("model", generateModel(projectionMatrix, shapes[i]->mScale, shapes[i]->position, shapes[i]->orient));
 		m_pickingEffect.DrawStartCB(i);
 		m_pickingEffect.SetObjectIndex(i);
 		shapes[i]->Draw();
@@ -71,59 +77,56 @@ void Window::Picing(vector<Shape*> &shapes) {
 
 	m_pickingTexture.DisableWriting();
 };
+
 void Window::Render(vector<Shape*> &shapes)
 {
 	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	shader->Use();
 	shader->SetMat4("projection", projectionMatrix);
 	for (int i = 0; i < shapes.size(); ++i)
 	{
-		glm::mat4 model(glm::translate(glm::mat4(1), { shapes[i]->position,0 }));
-		model = projectionMatrix * glm::rotate(model, shapes[i]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
-		shader->SetMat4("model", model);
+		shader->SetMat4("model", generateModel(projectionMatrix, shapes[i]->mScale, shapes[i]->position, shapes[i]->orient));;
 		shapes[i]->Draw();
 	}
 	if (mouse.is_presed) {
-
 		PickingTexture::PixelInfo Pixel = m_pickingTexture.ReadPixel((unsigned int)mouse.x, 600 - (unsigned int)mouse.y);
 		std::cout << Pixel.PrimID << " " << mouse.x << " " << mouse.y << endl;
 		if (Pixel.PrimID != 0) {
 			red->Use();
 			red->SetMat4("projection", projectionMatrix);
-			glm::mat4 model(glm::translate(glm::mat4(1), { shapes[Pixel.DrawID]->position, 0 }));
-			model = projectionMatrix * glm::rotate(model, shapes[Pixel.DrawID]->orient, glm::vec3(0.0f, 0.0f, 1.0f));
-			red->SetMat4("model", model);
+			red->SetMat4("model", generateModel(projectionMatrix, shapes[Pixel.DrawID]->mScale, shapes[Pixel.DrawID]->position, shapes[Pixel.DrawID]->orient));
 			shapes[Pixel.DrawID]->Draw();
 			shapes[Pixel.DrawID]->velocity = { 0,0 };
-			shapes[Pixel.DrawID]->angularVelocity += 0.2f;
 			glm::vec4 pos = glm::inverse(projectionMatrix)*glm::vec4((GLfloat)(mouse.x - 400) / 400, (GLfloat)(300 - mouse.y) / 300, -1, 190);
 			shapes[Pixel.DrawID]->position = { pos.x * 190,pos.y * 190 };
-
 		}
 	}
 }
 
-
 int Window::MainLoop(Scene& scene) {
 	shader->Use();
 	shader->SetInt("screenTexture", 0);
-	glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.f, 0.1f, 50.0f);
 	while (!glfwWindowShouldClose(window))
 	{
-
 		glfwPollEvents();
-		float current = (float)glfwGetTime();
-		picing->Use();
+#ifdef WIN32
+		accumulator += clock.Elapsed();
+#else
+		accumulator += clock.Elapsed() / static_cast<float>(std::chrono::duration_cast<clock_freq>(std::chrono::seconds(1)).count());
+#endif
+		clock.Start();
 		Picing(scene.shapes);
-		scene.Step();
-		shader->Use();
-		Render(scene.shapes);
 
+		while (accumulator >= dt) {
+			scene.Step();
+			accumulator -= dt;
+		}
+
+		clock.Stop();
+		Render(scene.shapes);
 		glfwSwapBuffers(window);
 	}
 	return 0;
 };
-

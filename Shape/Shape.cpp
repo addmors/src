@@ -9,6 +9,50 @@ void Circle::ComputeMass(float density)
 	length = radius;
 }
 
+
+void _setupMesh(GLuint &texture, GLuint &VAO, GLuint &VBO, GLuint &EBO, 
+	vector<unsigned int> &indices, vector<Vert> &vertices)
+{
+	int w, h;
+	unsigned char* image = SOIL_load_image("container.jpg", &w, &h, 0, SOIL_LOAD_RGB);
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	SOIL_free_image_data(image);
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vert), &vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+		&indices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, TexCoord));
+	glBindVertexArray(0);
+}
+void Circle::setupMeshCircle()
+{
+	_setupMesh(texture1_c, VAO_circle, VBO_circle, EBO_circle, indices_c, vertices_c);
+}
+void Shape::setupMesh()
+{
+	_setupMesh(texture1, VAO, VBO, EBO, indices, vertices);
+
+}
 void Polygon::ComputeMass(float  density)
 {
 	// Calculate centroid and moment of interia
@@ -71,6 +115,11 @@ void Polygon::SetBox(float hw, float hh)
 	Generate_indices();
 }
 
+Polygon::Polygon(float x, float y)
+{
+	SetBox(x, y);
+	vertices.erase(vertices.begin());
+};
 void Polygon::Generate_indices() {
 	indices.clear();
 	for (unsigned int i = 0; i < count_vertex-2; i++) {
@@ -80,34 +129,47 @@ void Polygon::Generate_indices() {
 	}
 }
 
-void Shape::Delete() {
+void _Delete(GLuint VAO, GLuint VBO, GLuint EBO) {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 
 }
-Circle::Circle(float r, float x, float y) :radius(r){
-	this->vertices.push_back({ {0,0}, {0.5,0.5} });
-	this->vertices.push_back({{r,0},{1, 0.5}});
+void Shape::Delete() {
+	_Delete(VAO, VBO, EBO);
+}
+void Circle::Delete() {
+	_Delete(VAO_circle, VBO_circle, EBO_circle);
+
+};
+
+Circle::Circle(float r, float x, float y) : radius(r)
+{
+	position = { x,y };
+	mScale = { r,r,1 };
+}
+
+void Circle::Init(){
+	vertices_c.push_back({{0,0}, {0.5,0.5}});
+	vertices_c.push_back({{1,0},{1, 0.5}});
 	for (int ii = 2; ii < 40; ii++) {
-		this->indices.push_back(0);
+		indices_c.push_back(0);
 		float theta = 2.0f * 3.1415926f * float(ii) / float(40);
-		float xx = r * cosf(theta);//calculate the x component
-		float yy = r * sinf(theta);//calculate the y component
-		this->vertices.push_back({ {xx,yy}, {(xx/float(r)+1)/2, (yy/float(r)+1)/2}});
-		this->indices.push_back(ii-1);
-		this->indices.push_back(ii);
+		float xx = cosf(theta);//calculate the x component
+		float yy = sinf(theta);//calculate the y component
+		vertices_c.push_back({ {xx,yy}, {(xx+1)/2, (yy+1)/2}});
+		indices_c.push_back(ii-1);
+		indices_c.push_back(ii);
 	}
-	this->indices.push_back(0);
-	this->indices.push_back(39);
-	this->indices.push_back(1);
-	setupMesh();
-	vertices.clear();
+	indices_c.push_back(0);
+	indices_c.push_back(39);
+	indices_c.push_back(1);
+	setupMeshCircle();
+	vertices_c.clear();
 }
 
 Polygon::Polygon(glm::vec2 vecs[], int count_vert, glm::vec2 Pos, glm::vec3 color)
 {
-
 	this->vertices.push_back({ Pos, {0.5,0.5} });
 	for (int i = 0; i < count_vert; i++) {
 		this->vertices.push_back({ vecs[i],{0,0}});
@@ -131,41 +193,6 @@ Polygon::Polygon(glm::vec2 vecs[], int count_vert, glm::vec2 Pos, glm::vec3 colo
 	vertices.erase(vertices.begin());
 }
 
-void Shape::setupMesh()
-{
-	int w, h;
-	unsigned char* image = SOIL_load_image("wood.png", &w, &h, 0, SOIL_LOAD_RGB);
-	glGenTextures(1, &texture1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SOIL_free_image_data(image);
-
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vert), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-		&indices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, TexCoord));
-	glBindVertexArray(0);
-}
-
 void Shape::Draw() const  {
 
 	glActiveTexture(GL_TEXTURE0);
@@ -176,6 +203,14 @@ void Shape::Draw() const  {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Circle::Draw() const {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture1_c);
+	glBindVertexArray(VAO_circle);
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices_c.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+};
 
 glm::vec2 Polygon::GetSupport(glm::vec2& dir) {
 	float LongestProg = -10000;
@@ -192,7 +227,6 @@ glm::vec2 Polygon::GetSupport(glm::vec2& dir) {
 	}
 	return bestvect;
 };
-
 
 void Shape::SetOrient(float radius)
 {

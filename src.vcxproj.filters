@@ -48,6 +48,9 @@
     <ClCompile Include="picking_technique.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Time.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader\Shad.h">
@@ -89,6 +92,9 @@
     <ClInclude Include="shader\red.vs">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Time.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\shadowshader.fs" />
@@ -96,5 +102,13 @@
     <None Include="shader\picking_technique.vs" />
     <None Include="shader\picking_technique.fs" />
     <None Include="shader\red.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="123.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="wood2.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>
