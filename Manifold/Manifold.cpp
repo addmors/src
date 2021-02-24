@@ -3,7 +3,7 @@
 
 void Manifold::Solve() {
 
-	Disp[A->GetType()][B->GetType()](this, A, B);
+	Disp[A->shape->GetType()][B->shape->GetType()](this, A->shape, B->shape);
 }
 
 void Manifold::Initialize(void) {

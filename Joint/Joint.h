@@ -1,16 +1,18 @@
 #pragma once
-#include "../Shape/Shape.h"
+#include "../Body/Body.h"
 #include "Math.h"
+
+class Shape;
 
 class Joint
 {
 public:
-	Joint(Shape* a, Shape* b, glm::vec2 dot_a, glm::vec2 dot_b): A(a),B(b), dot_In_A(dot_a), dot_In_B(dot_b)
+	Joint(Body* a, Body* b, glm::vec2 dot_a, glm::vec2 dot_b): A(a),B(b), dot_In_A(dot_a), dot_In_B(dot_b)
 	{
 		A->joint = b;
 		B->joint = a;};
-	Shape* A;
-	Shape* B;
+	Body* A;
+	Body* B;
 	glm::vec2 dot_In_A;
 	glm::vec2 dot_In_B;
 	glm::vec2 rv;

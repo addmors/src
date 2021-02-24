@@ -1,7 +1,7 @@
 #include"Sceen.h"
 
 
-void IntegrateForces(Shape *s, float dt)
+void IntegrateForces(Body *s, float dt)
 {
 	if (s->invesMass == 0.0f) return;
 
@@ -10,7 +10,7 @@ void IntegrateForces(Shape *s, float dt)
 
 }
 
-void IntegrateVelocity(Shape * s, float dt)
+void IntegrateVelocity(Body * s, float dt)
 {
 	if (s->invesMass == 0.0f) return;
 
@@ -23,22 +23,22 @@ void IntegrateVelocity(Shape * s, float dt)
 void Scene::Step(void)
 {
 	contacts.clear();
-	for (int i = 0; i < shapes.size(); ++i){
-		Shape *A = shapes[i];
-		for (int j = i + 1; j < shapes.size(); ++j)
+	for (int i = 0; i < bodies.size(); ++i){
+		Body *A = bodies[i];
+		for (int j = i + 1; j < bodies.size(); ++j)
 		{
-			Shape *B = shapes[j];
+			Body *B = bodies[j];
 			if (A->joint == B) continue;
 			if (A->invesMass == 0 && B->invesMass == 0) continue;
-			if ((A->length + B->length+3) < glm::length(A->position - B->position)) continue;
+			if ((A->length + B->length) < glm::length(A->position - B->position)) continue;
 			Manifold m(A, B);
 			m.Solve();
 			if (m.contact_count) contacts.push_back(m);
 		}
 	}
 
-	for (int i = 0; i < shapes.size(); ++i)
-		IntegrateForces(shapes[i], m_dt);
+	for (int i = 0; i < bodies.size(); ++i)
+		IntegrateForces(bodies[i], m_dt);
 
 	 for(int i = 0; i < contacts.size( ); ++i)
 			contacts[i].Initialize( );
@@ -52,8 +52,8 @@ void Scene::Step(void)
 			 contacts[i].ApplyImpulse();
 	 }
 
-	for (int i = 0; i < shapes.size(); ++i)
-		 IntegrateVelocity(shapes[i], m_dt);
+	for (int i = 0; i < bodies.size(); ++i)
+		 IntegrateVelocity(bodies[i], m_dt);
 
 	for (auto joint : joints)
 		joint.PositionalCorrection();
@@ -61,13 +61,20 @@ void Scene::Step(void)
 	 for (int i = 0; i < contacts.size(); ++i)
 		 contacts[i].PositionalCorrection();
 
-	 for (int i = 0; i < shapes.size(); ++i)
+	 for (int i = 0; i < bodies.size(); ++i)
 	 {
-		 shapes[i]->force = {0, 0};
-		 shapes[i]->torque =0;
+		 bodies[i]->force = {0, 0};
+		 bodies[i]->torque =0;
 	 }
 }
 
-void Scene::Add(Shape * shape) {shapes.push_back(shape);}
+void Scene::Add(Body * body) {bodies.push_back(body);}
 
 void Scene::AddJoint(Joint& joint) {joints.push_back(joint);}
+
+Body *Scene::Add(Shape *shape,  int  x,  int  y)
+{
+	Body *b = new Body(shape, x, y);
+	bodies.push_back(b);
+	return b;
+}

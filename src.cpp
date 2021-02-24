@@ -1,6 +1,4 @@
-﻿#include "SceenPhis\Sceen.h"
-#include "Window\Window.h"
-#include "Time.h"
+﻿#include "Precompiled.h"
 float delt = (float)1 / (float)60;
 
 
@@ -11,32 +9,33 @@ int main()
 	Scene scene(delt,15);
 
 	Circle::Init();
-	Polygon* polygon = new Polygon(100, 5);	
+	
+	Polygon* polygon = new Polygon(100, 5);
 	//Polygon* polygon2 = new Polygon(40, 2);
 	//Polygon* polygon3 = new Polygon(4, 40);
 	//Polygon* polygon4 = new Polygon(10, 10);
-	Circle* circle = new Circle(10, 22, 30);
-	Circle* circle2 = new Circle(20, 20, 0);
+	Circle* circle = new Circle(10);
+	Circle* circle2 = new Circle(20);
+
 	//Joint j(polygon2, polygon3, { 30,0 }, { 0,3 });
-	circle->ComputeMass(2);
-	circle2->ComputeMass(2);
-	polygon->position = {0,-50};
+
 	//polygon2->position = {0,30};
 	//polygon3->position = {14,27};
 	//polygon4->position = { 30,100};
-	polygon->ComputeMass(1);
-	polygon->SetStatic();
 	//polygon2->ComputeMass(1);
 	//polygon3->ComputeMass(1);
 	//polygon4->ComputeMass(1);
 	//polygon3->SetStatic();
-	scene.Add(polygon);
+	scene.Add(polygon,0,-50);
+	polygon->body->SetStatic();
+	win.AddShape(polygon);
 	//scene.Add(polygon2);
 	//scene.Add(polygon3);
 	//scene.Add(polygon4);
-	scene.Add(circle);
-	
-	scene.Add(circle2);
+	scene.Add(circle,22,30);
+	win.AddShape(circle);
+	scene.Add(circle2, 20, 0);
+	win.AddShape(circle2);
 	//scene.AddJoint(j);
 
 	

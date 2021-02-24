@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "../Shape/Shape.h"
+#include "../Body/Body.h"
 #include "../Manifold/Manifold.h"
 #include "../Joint/Joint.h"
 #include "../PicingTexture.h"
@@ -15,9 +15,10 @@ class Scene
 public:
 	Scene(float dt, int iterations) :m_dt(dt), m_iterations(iterations){};
 	void Step(void);
-	void Add(Shape *shape);
+	void Add(Body *shape);
+	Body* Add(Shape *, int,  int);
 	void AddJoint(Joint& joint);
-	std::vector<Shape*> shapes;
+	std::vector<Body*> bodies;
 	std::vector<Joint> joints;
 	std::vector<Manifold> contacts;
 	float m_dt;

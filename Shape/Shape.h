@@ -30,23 +30,24 @@ static std::vector<Vert> vertices_c;
 static std::vector<unsigned int> indices_c;
 
 
-class Shape : public Body
+class Shape
 {
 public:
-	Shape() : joint(nullptr) {};
+	Shape() {};
 	virtual void ComputeMass(float density) = 0;
 	virtual void Draw() const;
 	virtual void Delete();
 	virtual void setupMesh();
+	void Initialize( void )
+  {
+    ComputeMass( 1.0f );
+  }
 	virtual Type GetType() const = 0;
 	void SetOrient(float radius);
-	Shape* joint;
 	glm::vec3 color;
-	glm::vec2 position;
 	glm::mat2 orientation;
-	float orient;
-	float length;
 	glm::mat2 u;	
+	Body *body;
 	//Указатели на буферы для рисования 	//Кол-во точек;
 	unsigned int VAO, VBO, EBO, count_vertex;
 	//Вектор точек;
@@ -71,6 +72,7 @@ class Polygon : public virtual Shape {
 	void ComputeMass(float density) override;
 	//Для рисования
 	std::vector<glm::vec2> normals;
+	
 private:
 	//Текстуры TODO
 	void Generate_indices();
@@ -78,7 +80,7 @@ private:
 
 class Circle : public virtual Shape {
 public:	
-	Circle(float r, float x, float y);
+	Circle(float r);
 	static void Init();
 	void ComputeMass(float density) override;
 	static void Delete();
@@ -88,6 +90,7 @@ public:
 	float radius;
 };
 
-//class ComplexShape : public Polygon, public Circle {
+
+//class ComplexShape : public Body {
 //
 //};

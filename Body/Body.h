@@ -9,6 +9,7 @@
 using namespace std;
 
 
+class Shape;
 
 inline bool BiasGreaterThan(float a, float b)
 {
@@ -33,17 +34,13 @@ inline bool BiasGreaterThan(float a, float b)
 
 class Body {
 public:
-	Body() :
-		staticFriction(0.5f),
-		dynamicFriction(0.5f),
-		restitution(0.4f)
-		{};
+	Body(Shape *, int,  int);
 	Body(float s): mass(s){};
 	~Body() {};
 	//Применение силы
 	void ApplyForce(const glm::vec2& f) { force += f; };
 	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector);
-
+	void SetOrient(float radians);
 	//Для неподвижного обьекта масса бесконечна!!!
 	void SetStatic(void)
 	{
@@ -52,11 +49,16 @@ public:
 		mass = 0.0f;
 		invesMass = 0.0f;
 	}
+	Shape *shape;
 	float angularVelocity;
 	float staticFriction;
 	float dynamicFriction;
 	float restitution;
+	glm::vec2 position;
 	glm::vec2 velocity;
+	float length;
+	float orient;
+	Body* joint;
 	float torque;
 	glm::vec2 force;
 	// Set by shape

@@ -1,4 +1,4 @@
-#include "Collision.h"
+#include "../Precompiled.h"
 
 
 CollisionCallback Disp[Type::typeCount][Type::typeCount] =
@@ -29,9 +29,9 @@ void FindIncidentFace(glm::vec2 *v, Polygon *RefPoly, Polygon *IncPoly, int refe
 	}
 
 	// Assign face vertices for incidentFace
-	v[0] = IncPoly->u * IncPoly->vertices[incidentFace].Pos + IncPoly->position;
+	v[0] = IncPoly->u * IncPoly->vertices[incidentFace].Pos + IncPoly->body->position;
 	incidentFace = incidentFace + 1 >= IncPoly->count_vertex ? 0 : incidentFace + 1;
-	v[1] = IncPoly->u * IncPoly->vertices[incidentFace].Pos + IncPoly->position;
+	v[1] = IncPoly->u * IncPoly->vertices[incidentFace].Pos + IncPoly->body->position;
 }
 
 
@@ -59,8 +59,8 @@ float FindAxisLeastPenetration(int *faceIndex, Polygon *A, Polygon *B)
 		// Retrieve vertex on face from A, transform into
 		// B's model space
 		glm::vec2 v = A->vertices[i].Pos;
-		v = A->u * v + A->position;
-		v -= B->position;
+		v = A->u * v + A->body->position;
+		v -= B->body->position;
 		v = buT * v;
 
 		// Compute penetration distance (in B's model space)
@@ -116,9 +116,9 @@ int Clip(glm::vec2 n, float c, glm::vec2  *face)
 
 void CircletoCircle(Manifold *m, Shape *a, Shape *b)
 {
-	Circle *A = reinterpret_cast<Circle *>(a);
-	Circle *B = reinterpret_cast<Circle *>(b);
-	glm::vec2 normal = a->position - b->position;
+	Circle *A = dynamic_cast<Circle *>(a);
+	Circle *B = dynamic_cast<Circle *>(b);
+	glm::vec2 normal = a->body->position - b->body->position;
 	double dist_sqr = normal.x*normal.x + normal.y*normal.y;
 	float radius = A->radius + B->radius;
 
@@ -135,26 +135,26 @@ void CircletoCircle(Manifold *m, Shape *a, Shape *b)
 	{
 		m->penetration = A->radius;
 		m->normal = glm::vec2(1, 0);
-		m->contacts[0] = a->position;
+		m->contacts[0] = a->body->position;
 	} else 
 	{
 		m->penetration = radius - distance;
 		m->normal = -normal / distance; // Faster than using Normalized since we already performed sqrt
-		m->contacts[0] = m->normal * A->radius + a->position;
+		m->contacts[0] = m->normal * A->radius + a->body->position;
 	}
 
 };
 
 void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
 {
-	Circle *A = reinterpret_cast<Circle *>(a);
-	Polygon *B = reinterpret_cast<Polygon *>(b);
+	Circle *A = dynamic_cast<Circle *>(a);
+	Polygon *B = dynamic_cast<Polygon *>(b);
 
 	m->contact_count = 0;
 
 	// Transform circle center to Polygon model space
-	glm::vec2 center = a->position;
-	center = glm::transpose(B->u)*(center - b->position);
+	glm::vec2 center = a->body->position;
+	center = glm::transpose(B->u)*(center - b->body->position);
 
 	// Find edge with minimum penetration
 	// Exact concept as using support points in Polygon vs Polygon
@@ -184,7 +184,7 @@ void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
 	{
 		m->contact_count = 1;
 		m->normal = -(B->u * B->normals[faceNormal]);
-		m->contacts[0] = m->normal * A->radius + a->position;
+		m->contacts[0] = m->normal * A->radius + a->body->position;
 		m->penetration = A->radius;
 		return;
 	}
@@ -205,7 +205,7 @@ void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
 		n = B->u * n;
 		n = glm::normalize(n);
 		m->normal = n;
-		v1 = B->u * v1 + b->position;
+		v1 = B->u * v1 + b->body->position;
 		m->contacts[0] = v1;
 	}
 
@@ -217,7 +217,7 @@ void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
 
 		m->contact_count = 1;
 		glm::vec2 n = v2 - center;
-		v2 = B->u * v2 + b->position;
+		v2 = B->u * v2 + b->body->position;
 		m->contacts[0] = v2;
 		n = B->u * n;
 		n = glm::normalize(n);
@@ -233,7 +233,7 @@ void CircletoPolygon(Manifold *m, Shape *a, Shape *b)
 
 		n = B->u * n;
 		m->normal = -n;
-		m->contacts[0] = m->normal * A->radius + a->position;
+		m->contacts[0] = m->normal * A->radius + a->body->position;
 		m->contact_count = 1;
 	}
 }
@@ -246,8 +246,8 @@ void PolygontoCircle(Manifold *m, Shape *a, Shape *b)
 
 void PolygontoPolygon(Manifold * m, Shape * a, Shape * b)
 {
-	Polygon *A = reinterpret_cast<Polygon *>(a);
-	Polygon *B = reinterpret_cast<Polygon *>(b);
+	Polygon *A = dynamic_cast<Polygon *>(a);
+	Polygon *B = dynamic_cast<Polygon *>(b);
 	m->contact_count = 0;
 
 	int faceA;
@@ -293,8 +293,8 @@ void PolygontoPolygon(Manifold * m, Shape * a, Shape * b)
 	glm::vec2 v2 = RefPoly->vertices[referenceIndex].Pos;
 
 	// Transform vertices to world space
-	v1 = RefPoly->u * v1 + RefPoly->position;
-	v2 = RefPoly->u * v2 + RefPoly->position;
+	v1 = RefPoly->u * v1 + RefPoly->body->position;
+	v2 = RefPoly->u * v2 + RefPoly->body->position;
 
 	glm::vec2 sidePlaneNormal = glm::normalize(v2 - v1);
 

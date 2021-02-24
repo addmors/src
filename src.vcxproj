@@ -175,6 +175,7 @@
     <ClCompile Include="Manifold\Manifold.cpp" />
     <ClCompile Include="PicingTexture.cpp" />
     <ClCompile Include="picking_technique.cpp" />
+    <ClCompile Include="Precompiled.cpp" />
     <ClCompile Include="SceenPhis\Sceen.cpp" />
     <ClCompile Include="shader\Shad.cpp" />
     <ClCompile Include="Shape\Shape.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Manifold\Manifold.h" />
     <ClInclude Include="PicingTexture.h" />
     <ClInclude Include="picking_technique.h" />
+    <ClInclude Include="Precompiled.h" />
     <ClInclude Include="SceenPhis\Sceen.h" />
     <ClInclude Include="render_callbacks.h" />
     <ClInclude Include="shader\Shad.h" />

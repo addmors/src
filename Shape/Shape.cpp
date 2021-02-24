@@ -2,11 +2,11 @@
 
 void Circle::ComputeMass(float density)
 {
-	mass = PI * radius * radius * density;
-	invesMass = (mass) ? 1.0f / mass : 0.0f;
-	Inertial = mass * radius * radius;
-	inversInertial = (Inertial) ? 1.0f / Inertial : 0.0f;
-	length = radius;
+	body->mass = PI * radius * radius * density;
+	body->invesMass = (body->mass) ? 1.0f / body->mass : 0.0f;
+	body->Inertial = body->mass * radius * radius;
+	body->inversInertial = (body->Inertial) ? 1.0f / body->Inertial : 0.0f;
+	body->length = radius;
 }
 
 
@@ -86,16 +86,16 @@ void Polygon::ComputeMass(float  density)
 	// Not really necessary, but I like doing this anyway
 	for (unsigned int i = 0; i < count_vertex; ++i)
 		vertices.at(i).Pos -= c;
-	length = 0;
+	body->length = 0;
 	for (unsigned int i = 0; i < count_vertex; ++i) {
 		float a = glm::length(vertices[i].Pos);
-		if (length < a) length = a;
+		if (body->length < a) body->length = a;
 	}
 	setupMesh();
-	mass = density * area;
-	invesMass = (mass) ? 1.0f / mass: 0.0f;
-	Inertial = I * density;
-	inversInertial = Inertial ? 1.0f / Inertial : 0.0f;
+	body->mass = density * area;
+	body->invesMass = (body->mass) ? 1.0f / body->mass: 0.0f;
+	body->Inertial = I * density;
+	body->inversInertial = body->Inertial ? 1.0f / body->Inertial : 0.0f;
 }
 
 void Polygon::SetBox(float hw, float hh)
@@ -143,9 +143,8 @@ void Circle::Delete() {
 
 };
 
-Circle::Circle(float r, float x, float y) : radius(r)
+Circle::Circle(float r) : radius(r)
 {
-	position = { x,y };
 	mScale = { r,r,1 };
 }
 
@@ -230,7 +229,7 @@ glm::vec2 Polygon::GetSupport(glm::vec2& dir) {
 
 void Shape::SetOrient(float radius)
 {
-		orient = radius;
+	body->orient = radius;
 		float c = std::cos(radius);
 		float s = std::sin(radius);
 		u = {c,s,-s,c};

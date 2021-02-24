@@ -23,14 +23,16 @@ class Window
 public:
 	Window();
 	~Window() { glfwTerminate(); delete shader; delete picing; delete red; };
-	void Render(vector<Shape*> &shapes);
-	void Picing(vector<Shape*> &shapes);
+	void Render();
+	void Picing();
 	int MainLoop(Scene&);
+	void AddShape(Shape *shape) { shapes.push_back(shape);};
 private:
 	glm::mat4 projectionMatrix;
 	Clock clock;
 	Shader *shader, *picing, *red;
-	float accumulator = 0;
+	vector<Shape*> shapes;
+ 	float accumulator = 0;
 	GLFWwindow* window;
 	int width, height;
 	PickingTexture m_pickingTexture;
