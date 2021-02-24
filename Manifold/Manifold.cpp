@@ -39,12 +39,12 @@ void Manifold::ApplyImpulse(){
 		glm::vec2 rv = B->velocity + CrossMy(B->angularVelocity, rb) - A->velocity - CrossMy(A->angularVelocity, ra);
 		//Скорость по нормали
 		float contactVel = glm::dot(rv, normal);
-		//Если скорость по нормали больше 0 то она ращделяет обьекты
 
+		//Если скорость по нормали больше 0 то она ращделяет обьекты
 		if (contactVel >= 0) return;
 
 		//Действующая масса
-			float raCrossN = CrossMy(ra, normal);
+		float raCrossN = CrossMy(ra, normal);
 		float rbCrossN = CrossMy(rb, normal);
 
 		float invMassSum = A->invesMass + B->invesMass + raCrossN*raCrossN * A->inversInertial + rbCrossN * rbCrossN * B->inversInertial;
@@ -74,6 +74,7 @@ void Manifold::ApplyImpulse(){
 		B->ApplyImpulse(tangentImpulse, rb);
 	}
 }
+
 
 void Manifold::PositionalCorrection()
 {

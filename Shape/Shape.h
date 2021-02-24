@@ -29,6 +29,7 @@ static GLuint texture1_c;
 static std::vector<Vert> vertices_c;
 static std::vector<unsigned int> indices_c;
 
+
 class Shape : public Body
 {
 public:
@@ -56,7 +57,7 @@ public:
 	glm::vec3 mScale = glm::vec3(1.f, 1.f, 1.f);
 };
 
-class Polygon : public Shape {
+class Polygon : public virtual Shape {
 	public: 
 	//Инициализаторы
 	Polygon(float x, float y);
@@ -75,7 +76,7 @@ private:
 	void Generate_indices();
 };
 
-class Circle : public Shape {
+class Circle : public virtual Shape {
 public:	
 	Circle(float r, float x, float y);
 	static void Init();
@@ -86,3 +87,7 @@ public:
 	static void setupMeshCircle();
 	float radius;
 };
+
+//class ComplexShape : public Polygon, public Circle {
+//
+//};
