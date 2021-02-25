@@ -31,3 +31,10 @@ inline float DistSqr(const glm::vec2& a, const glm::vec2& b)
 	glm::vec2 c = a - b;
 	return glm::dot(c, c);
 }
+
+inline float Clamp(float min, float max, float a)
+{
+	if (a < min) return min;
+	if (a > max) return max;
+	return a;
+}

@@ -175,10 +175,12 @@
     <ClCompile Include="Manifold\Manifold.cpp" />
     <ClCompile Include="PicingTexture.cpp" />
     <ClCompile Include="picking_technique.cpp" />
+    <ClCompile Include="Precompiled.cpp" />
     <ClCompile Include="SceenPhis\Sceen.cpp" />
     <ClCompile Include="shader\Shad.cpp" />
     <ClCompile Include="Shape\Shape.cpp" />
     <ClCompile Include="src.cpp" />
+    <ClCompile Include="Time.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -188,11 +190,13 @@
     <ClInclude Include="Manifold\Manifold.h" />
     <ClInclude Include="PicingTexture.h" />
     <ClInclude Include="picking_technique.h" />
+    <ClInclude Include="Precompiled.h" />
     <ClInclude Include="SceenPhis\Sceen.h" />
     <ClInclude Include="render_callbacks.h" />
     <ClInclude Include="shader\Shad.h" />
     <ClInclude Include="Shape\Shape.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="Window\Window.h" />
     <ClInclude Include="shader\red.vs" />
   </ItemGroup>
@@ -202,6 +206,10 @@
     <None Include="shader\red.fs" />
     <None Include="shader\shadowshader.fs" />
     <None Include="shader\shadowshader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="123.jpg" />
+    <Image Include="wood2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

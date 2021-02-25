@@ -2,18 +2,62 @@
 
 void Circle::ComputeMass(float density)
 {
-	mass = PI * radius * radius * density;
-	invesMass = (mass) ? 1.0f / mass : 0.0f;
-	Inertial = mass * radius * radius;
-	inversInertial = (Inertial) ? 1.0f / Inertial : 0.0f;
-	length = radius;
+	body->mass = PI * radius * radius * density;
+	body->invesMass = (body->mass) ? 1.0f / body->mass : 0.0f;
+	body->Inertial = body->mass * radius * radius;
+	body->inversInertial = (body->Inertial) ? 1.0f / body->Inertial : 0.0f;
+	body->length = radius;
+	area = PI * radius*radius;
 }
 
+
+void _setupMesh(GLuint &texture, GLuint *VAO, GLuint *VBO, GLuint *EBO, 
+	vector<unsigned int> &indices, vector<Vert> &vertices)
+{
+	int w, h;
+	unsigned char* image = SOIL_load_image("container.jpg", &w, &h, 0, SOIL_LOAD_RGB);
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	SOIL_free_image_data(image);
+
+	glGenVertexArrays(1, VAO);
+	glGenBuffers(1, VBO);
+	glGenBuffers(1, EBO);
+
+	glBindVertexArray(*VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vert), &vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+		&indices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, TexCoord));
+	glBindVertexArray(0);
+}
+void Circle::setupMeshCircle()
+{
+	_setupMesh(texture1_c, VAO_circle, VBO_circle, EBO_circle, indices_c, vertices_c);
+}
+void Shape::setupMesh()
+{
+	_setupMesh(texture1, VAO, VBO, EBO, indices, vertices);
+
+}
 void Polygon::ComputeMass(float  density)
 {
 	// Calculate centroid and moment of interia
 	glm::vec2  c(0.0f, 0.0f); // centroid
-	float  area = 0.0f;
 	float  I = 0.0f;
 	for (unsigned int i = 0; i < count_vertex; ++i)
 	{
@@ -34,7 +78,6 @@ void Polygon::ComputeMass(float  density)
 		float inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
 		I += (0.5f *triangleArea / 3) * (intx2 + inty2);
 	}
-
 	c *= 1.0f / area;
 
 	// Translate vertices to centroid (make the centroid (0, 0)
@@ -42,16 +85,15 @@ void Polygon::ComputeMass(float  density)
 	// Not really necessary, but I like doing this anyway
 	for (unsigned int i = 0; i < count_vertex; ++i)
 		vertices.at(i).Pos -= c;
-	length = 0;
+	body->length = 0;
 	for (unsigned int i = 0; i < count_vertex; ++i) {
 		float a = glm::length(vertices[i].Pos);
-		if (length < a) length = a;
+		if (body->length < a) body->length = a;
 	}
-	setupMesh();
-	mass = density * area;
-	invesMass = (mass) ? 1.0f / mass: 0.0f;
-	Inertial = I * density;
-	inversInertial = Inertial ? 1.0f / Inertial : 0.0f;
+	body->mass = density * area;
+	body->invesMass = (body->mass) ? 1.0f / body->mass: 0.0f;
+	body->Inertial = I * density;
+	body->inversInertial = body->Inertial ? 1.0f / body->Inertial : 0.0f;
 }
 
 void Polygon::SetBox(float hw, float hh)
@@ -69,45 +111,66 @@ void Polygon::SetBox(float hw, float hh)
 	normals.push_back({ 0.0f, 1.0f } );
 	normals.push_back({ -1.0f, 0.0f });
 	Generate_indices();
+	setupMesh();
 }
 
+Polygon::Polygon(float x, float y)
+{
+	SetBox(x, y);
+	vertices.erase(vertices.begin());
+};
 void Polygon::Generate_indices() {
 	indices.clear();
-	for (unsigned int i = 0; i < count_vertex-2; i++) {
+	for (unsigned int i = 0; i < count_vertex-1; i++) {
 		this->indices.push_back(0);
 		this->indices.push_back(i + 1);
 		this->indices.push_back(i + 2);
 	}
-}
-
-void Shape::Delete() {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-
-}
-Circle::Circle(float r, float x, float y) :radius(r){
-	this->vertices.push_back({ {0,0}, {0.5,0.5} });
-	this->vertices.push_back({{r,0},{1, 0.5}});
-	for (int ii = 2; ii < 40; ii++) {
-		this->indices.push_back(0);
-		float theta = 2.0f * 3.1415926f * float(ii) / float(40);
-		float xx = r * cosf(theta);//calculate the x component
-		float yy = r * sinf(theta);//calculate the y component
-		this->vertices.push_back({ {xx,yy}, {(xx/float(r)+1)/2, (yy/float(r)+1)/2}});
-		this->indices.push_back(ii-1);
-		this->indices.push_back(ii);
-	}
 	this->indices.push_back(0);
-	this->indices.push_back(39);
+	this->indices.push_back(count_vertex);
 	this->indices.push_back(1);
-	setupMesh();
-	vertices.clear();
+}
+
+void _Delete(GLuint *VAO, GLuint *VBO, GLuint *EBO) {
+	glDeleteVertexArrays(1, VAO);
+	glDeleteBuffers(1, VBO);
+	glDeleteBuffers(1, EBO);
+
+}
+void Shape::Delete() {
+	_Delete(VAO, VBO, EBO);
+}
+void Circle::Delete() {
+	_Delete(VAO_circle, VBO_circle, EBO_circle);
+
+};
+
+Circle::Circle(float r) : radius(r)
+{
+	mScale = { r,r,1 };
+}
+
+void Circle::Init(){
+	vertices_c.push_back({{0,0}, {0.5,0.5}});
+	vertices_c.push_back({{1,0},{1, 0.5}});
+	for (int ii = 2; ii < 40; ii++) {
+		indices_c.push_back(0);
+		float theta = 2.0f * 3.1415926f * float(ii) / float(40);
+		float xx = cosf(theta);//calculate the x component
+		float yy = sinf(theta);//calculate the y component
+		vertices_c.push_back({ {xx,yy}, {(xx+1)/2, (yy+1)/2}});
+		indices_c.push_back(ii-1);
+		indices_c.push_back(ii);
+	}
+	indices_c.push_back(0);
+	indices_c.push_back(39);
+	indices_c.push_back(1);
+	setupMeshCircle();
+	vertices_c.clear();
 }
 
 Polygon::Polygon(glm::vec2 vecs[], int count_vert, glm::vec2 Pos, glm::vec3 color)
 {
-
 	this->vertices.push_back({ Pos, {0.5,0.5} });
 	for (int i = 0; i < count_vert; i++) {
 		this->vertices.push_back({ vecs[i],{0,0}});
@@ -131,51 +194,24 @@ Polygon::Polygon(glm::vec2 vecs[], int count_vert, glm::vec2 Pos, glm::vec3 colo
 	vertices.erase(vertices.begin());
 }
 
-void Shape::setupMesh()
-{
-	int w, h;
-	unsigned char* image = SOIL_load_image("wood.png", &w, &h, 0, SOIL_LOAD_RGB);
-	glGenTextures(1, &texture1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SOIL_free_image_data(image);
-
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vert), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-		&indices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, TexCoord));
-	glBindVertexArray(0);
-}
-
 void Shape::Draw() const  {
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
-	glBindVertexArray(VAO);
+	glBindVertexArray(*VAO);
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Circle::Draw() const {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture1_c);
+	glBindVertexArray(*VAO_circle);
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices_c.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+};
 
 glm::vec2 Polygon::GetSupport(glm::vec2& dir) {
 	float LongestProg = -10000;
@@ -193,11 +229,41 @@ glm::vec2 Polygon::GetSupport(glm::vec2& dir) {
 	return bestvect;
 };
 
-
 void Shape::SetOrient(float radius)
 {
-		orient = radius;
+	body->orient = radius;
 		float c = std::cos(radius);
 		float s = std::sin(radius);
 		u = {c,s,-s,c};
 }
+
+void ComplexShape::AddShape(Shape * shape, glm::vec2 localpos){
+	dotShape.push_back({ localpos, shape });
+}
+void ComplexShape::Delete() {
+	for (auto elem : dotShape) elem.shape->Draw();
+}
+
+void ComplexShape::Draw() const
+{
+	for (auto elem : dotShape) elem.shape->Draw();
+}
+
+void ComplexShape::ComputeMass(float desteny = 1) {
+	glm::vec2 c(0,0);
+	body->mass = 0;
+	float _area(0);
+	
+	for (auto elem : dotShape) {
+		float x = elem.shape->body->position.x;
+		float y = elem.shape->body->position.y;
+		c.x += x*elem.shape->area;
+		c.y += y*elem.shape->area;
+		_area += elem.shape->area;
+		body->mass += elem.shape->body->mass;
+		body->Inertial += (x * x + y * y)*elem.shape->body->mass;
+	};
+	body->invesMass = (body->mass) ? 1.0f / body->mass : 0.0f;
+	body->inversInertial = (body->Inertial) ? 1.0f / body->Inertial : 0.0f;
+	body->position = { c.x / _area, c.y / _area };
+};

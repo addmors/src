@@ -6,13 +6,13 @@
 struct Manifold
 {
 public:
-	Manifold(Shape *a, Shape *b)
+	Manifold(Body *a, Body *b)
 		: A(a), B(b),
 		e(std::min(a->restitution, b->restitution)),
 		df(std::sqrt(a->staticFriction * b->staticFriction)),
 		sf(std::sqrt(a->dynamicFriction * b->dynamicFriction)){};
-	Shape* A;
-	Shape* B;
+	Body* A;
+	Body* B;
 	int contact_count; // Number of contacts that occured during collision
 	float e;               // Mixed restitution
 	float df;              // Mixed dynamic friction
