@@ -5,7 +5,7 @@ Body::Body(Shape *_shape,  int x,  int y) :
 	staticFriction(0.5f),
 	dynamicFriction(0.5f),
 	restitution(0.4f),
-	shape(_shape),
+	shape(_shape->Clone()),
 	position({x,y})
 {
 	shape->body = this;

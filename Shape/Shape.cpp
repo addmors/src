@@ -7,10 +7,11 @@ void Circle::ComputeMass(float density)
 	body->Inertial = body->mass * radius * radius;
 	body->inversInertial = (body->Inertial) ? 1.0f / body->Inertial : 0.0f;
 	body->length = radius;
+	area = PI * radius*radius;
 }
 
 
-void _setupMesh(GLuint &texture, GLuint &VAO, GLuint &VBO, GLuint &EBO, 
+void _setupMesh(GLuint &texture, GLuint *VAO, GLuint *VBO, GLuint *EBO, 
 	vector<unsigned int> &indices, vector<Vert> &vertices)
 {
 	int w, h;
@@ -25,16 +26,16 @@ void _setupMesh(GLuint &texture, GLuint &VAO, GLuint &VBO, GLuint &EBO,
 	glBindTexture(GL_TEXTURE_2D, 0);
 	SOIL_free_image_data(image);
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	glGenVertexArrays(1, VAO);
+	glGenBuffers(1, VBO);
+	glGenBuffers(1, EBO);
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindVertexArray(*VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, *VBO);
 
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vert), &vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
 		&indices[0], GL_STATIC_DRAW);
 
@@ -57,7 +58,6 @@ void Polygon::ComputeMass(float  density)
 {
 	// Calculate centroid and moment of interia
 	glm::vec2  c(0.0f, 0.0f); // centroid
-	float  area = 0.0f;
 	float  I = 0.0f;
 	for (unsigned int i = 0; i < count_vertex; ++i)
 	{
@@ -78,7 +78,6 @@ void Polygon::ComputeMass(float  density)
 		float inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
 		I += (0.5f *triangleArea / 3) * (intx2 + inty2);
 	}
-
 	c *= 1.0f / area;
 
 	// Translate vertices to centroid (make the centroid (0, 0)
@@ -91,7 +90,6 @@ void Polygon::ComputeMass(float  density)
 		float a = glm::length(vertices[i].Pos);
 		if (body->length < a) body->length = a;
 	}
-	setupMesh();
 	body->mass = density * area;
 	body->invesMass = (body->mass) ? 1.0f / body->mass: 0.0f;
 	body->Inertial = I * density;
@@ -113,6 +111,7 @@ void Polygon::SetBox(float hw, float hh)
 	normals.push_back({ 0.0f, 1.0f } );
 	normals.push_back({ -1.0f, 0.0f });
 	Generate_indices();
+	setupMesh();
 }
 
 Polygon::Polygon(float x, float y)
@@ -122,17 +121,20 @@ Polygon::Polygon(float x, float y)
 };
 void Polygon::Generate_indices() {
 	indices.clear();
-	for (unsigned int i = 0; i < count_vertex-2; i++) {
+	for (unsigned int i = 0; i < count_vertex-1; i++) {
 		this->indices.push_back(0);
 		this->indices.push_back(i + 1);
 		this->indices.push_back(i + 2);
 	}
+	this->indices.push_back(0);
+	this->indices.push_back(count_vertex);
+	this->indices.push_back(1);
 }
 
-void _Delete(GLuint VAO, GLuint VBO, GLuint EBO) {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+void _Delete(GLuint *VAO, GLuint *VBO, GLuint *EBO) {
+	glDeleteVertexArrays(1, VAO);
+	glDeleteBuffers(1, VBO);
+	glDeleteBuffers(1, EBO);
 
 }
 void Shape::Delete() {
@@ -196,7 +198,7 @@ void Shape::Draw() const  {
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
-	glBindVertexArray(VAO);
+	glBindVertexArray(*VAO);
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -205,7 +207,7 @@ void Shape::Draw() const  {
 void Circle::Draw() const {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture1_c);
-	glBindVertexArray(VAO_circle);
+	glBindVertexArray(*VAO_circle);
 	glDrawElements(GL_TRIANGLES, (GLsizei)indices_c.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -234,3 +236,34 @@ void Shape::SetOrient(float radius)
 		float s = std::sin(radius);
 		u = {c,s,-s,c};
 }
+
+void ComplexShape::AddShape(Shape * shape, glm::vec2 localpos){
+	dotShape.push_back({ localpos, shape });
+}
+void ComplexShape::Delete() {
+	for (auto elem : dotShape) elem.shape->Draw();
+}
+
+void ComplexShape::Draw() const
+{
+	for (auto elem : dotShape) elem.shape->Draw();
+}
+
+void ComplexShape::ComputeMass(float desteny = 1) {
+	glm::vec2 c(0,0);
+	body->mass = 0;
+	float _area(0);
+	
+	for (auto elem : dotShape) {
+		float x = elem.shape->body->position.x;
+		float y = elem.shape->body->position.y;
+		c.x += x*elem.shape->area;
+		c.y += y*elem.shape->area;
+		_area += elem.shape->area;
+		body->mass += elem.shape->body->mass;
+		body->Inertial += (x * x + y * y)*elem.shape->body->mass;
+	};
+	body->invesMass = (body->mass) ? 1.0f / body->mass : 0.0f;
+	body->inversInertial = (body->Inertial) ? 1.0f / body->Inertial : 0.0f;
+	body->position = { c.x / _area, c.y / _area };
+};

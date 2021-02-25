@@ -10,7 +10,7 @@ int main()
 
 	Circle::Init();
 	
-	Polygon* polygon = new Polygon(100, 5);
+	Polygon* polygon = new Polygon(150, 50);
 	//Polygon* polygon2 = new Polygon(40, 2);
 	//Polygon* polygon3 = new Polygon(4, 40);
 	//Polygon* polygon4 = new Polygon(10, 10);
@@ -26,16 +26,81 @@ int main()
 	//polygon3->ComputeMass(1);
 	//polygon4->ComputeMass(1);
 	//polygon3->SetStatic();
-	scene.Add(polygon,0,-50);
-	polygon->body->SetStatic();
-	win.AddShape(polygon);
+	Body* b = scene.Add(polygon,0,-100);
+	b->SetStatic();
+	win.AddShape(b->shape);
+
 	//scene.Add(polygon2);
 	//scene.Add(polygon3);
 	//scene.Add(polygon4);
-	scene.Add(circle,22,30);
-	win.AddShape(circle);
-	scene.Add(circle2, 20, 0);
-	win.AddShape(circle2);
+	b = scene.Add(circle,22,30);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 22, 30);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 22, 30);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 22, 30);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 22, 30);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 22, 30);
+	win.AddShape(b->shape);
+	b = scene.Add(circle, 40, 40);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle, 50, 50);
+	win.AddShape(b->shape);
+	b =scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
+	b = scene.Add(circle2, 20, 0);
+	win.AddShape(b->shape);
 	//scene.AddJoint(j);
 
 	

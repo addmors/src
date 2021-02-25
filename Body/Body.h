@@ -36,7 +36,6 @@ class Body {
 public:
 	Body(Shape *, int,  int);
 	Body(float s): mass(s){};
-	~Body() {};
 	//Применение силы
 	void ApplyForce(const glm::vec2& f) { force += f; };
 	void ApplyImpulse(const glm::vec2& impulse, const glm::vec2& contactVector);

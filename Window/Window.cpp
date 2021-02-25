@@ -17,7 +17,6 @@ void mouseKey(GLFWwindow * window, int button, int action, int mode)
 {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == 1) {
 		mouse.is_presed = true;
-		window = glfwCreateWindow(1000, 600, "MyPhiziks", nullptr/*glfwGetPrimaryMonitor()*/, nullptr);
 	}
 	else mouse.is_presed = false;
 	
